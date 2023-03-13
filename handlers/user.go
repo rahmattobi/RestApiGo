@@ -4,6 +4,7 @@ import (
 	"auth-jwt/database"
 	"auth-jwt/models/entity"
 	"auth-jwt/models/request"
+	"auth-jwt/utils"
 	"log"
 
 	"github.com/go-playground/validator/v10"
@@ -56,6 +57,17 @@ func HandlerUserInput(ctx *fiber.Ctx) error {
 		Address: user.Address,
 		Phone:   user.Phone,
 	}
+
+	hashedPassword, err := utils.HashingPassword(user.Password)
+
+	if err != nil {
+		log.Println(err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "internal server error",
+		})
+	}
+
+	newUser.Password = hashedPassword
 
 	errCreateuser := database.DB.Create(&newUser).Error
 
