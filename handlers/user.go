@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func HandlerUser(ctx *fiber.Ctx) error {
@@ -49,6 +50,14 @@ func HandlerUserInput(ctx *fiber.Ctx) error {
 			"Message": "Failed",
 			"Error":   errValidate.Error(),
 		})
+	}
+
+	exists, err := CheckEmailExists(database.DB, user.Email)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return ctx.JSON(fiber.Map{"message": "Email exists"})
 	}
 
 	newUser := entity.User{
@@ -144,4 +153,16 @@ func HandlerUserDelete(ctx *fiber.Ctx) error {
 		"message": "user was deleted",
 	})
 
+}
+
+func CheckEmailExists(db *gorm.DB, email string) (bool, error) {
+	var user entity.User
+	result := db.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, result.Error
+	}
+	return true, nil
 }
