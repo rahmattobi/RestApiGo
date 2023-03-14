@@ -12,8 +12,8 @@ func RouteInit(c *fiber.App) {
 	c.Post("/login", handlers.Login)
 
 	c.Get("/user", middleware.Auth, handlers.HandlerUser)
-	c.Get("/user/:id", handlers.HandlerUserGetById)
-	c.Post("/user", handlers.HandlerUserInput)
-	c.Put("/user/:id", handlers.HandlerUserUpdate)
-	c.Delete("/user/:id", handlers.HandlerUserDelete)
+	c.Get("/user/:id", middleware.Auth, handlers.HandlerUserGetById)
+	c.Post("/user", middleware.Auth, handlers.HandlerUserInput)
+	c.Put("/user/:id", middleware.Auth, handlers.HandlerUserUpdate)
+	c.Delete("/user/:id", middleware.Auth, handlers.HandlerUserDelete)
 }
